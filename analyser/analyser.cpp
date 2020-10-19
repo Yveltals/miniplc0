@@ -262,8 +262,10 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
     if (err.has_value()) return err;
   if (isUninitializedVariable(identify)) //未定义变量
     _instructions.emplace_back(Operation::STO, _uninitialized_vars[identify]);
-  else 
+  else if(isInitializedVariable(identify))
     _instructions.emplace_back(Operation::STO, _vars[identify]);
+  else 
+    _instructions.emplace_back(Operation::STO, _consts[identify]);
   // ';'
   next = nextToken();
   if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
