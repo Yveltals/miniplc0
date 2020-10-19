@@ -30,6 +30,8 @@ void Analyse(std::istream &input, std::ostream &output) {
   auto p = analyser.Analyse();
   if (p.second.has_value()) {
     fmt::print(stderr, "Syntactic analysis error: {}\n", p.second.value());
+    auto v = p.first;
+    for (auto &it : v) output << fmt::format("{}\n", it);
     // 同上
     exit(0);
   }
