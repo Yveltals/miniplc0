@@ -361,8 +361,10 @@ std::optional<CompilationError> Analyser::analyseFactor() {
     case TokenType::IDENTIFIER: {
       if (isUninitializedVariable(next.value().GetValueString()))
         _instructions.emplace_back(Operation::LOD, _uninitialized_vars[next.value().GetValueString()]);
-      else
+      else if(isInitializedVariable(next.value().GetValueString()))
         _instructions.emplace_back(Operation::LOD, _vars[next.value().GetValueString()]);
+      else
+        _instructions.emplace_back(Operation::LOD, _consts[next.value().GetValueString()]);  
       break;
     }
     case TokenType::UNSIGNED_INTEGER: {
