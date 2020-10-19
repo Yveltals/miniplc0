@@ -122,12 +122,15 @@ std::optional<CompilationError> Analyser::analyseVariableDeclaration() {
     if (!tmp.has_value() || tmp.value().GetType() != TokenType::EQUAL_SIGN) {
       unreadToken(); // TODO: eof?
       addUninitializedVariable(next.value());
+      _instructions.emplace_back(Operation::LIT, 0);
     }
     else {
       addVariable(next.value());
+      _instructions.emplace_back(Operation::LIT, 0);
       // '<表达式>'
       auto err = analyseExpression();
       if (err.has_value()) return err;
+      _instructions.emplace_back(Operation::STO, _vars[next.value().GetValueString()]);
     }
     // ';'
     next = nextToken();
@@ -248,14 +251,19 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
     return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNotDeclared);
   if (isConstant(next.value().GetValueString()))
     return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrAssignToConstant);
-
+  std::string identify = next.value().GetValueString();
   // =
   next = nextToken();
     if (!next.has_value() || next.value().GetType() != TokenType::EQUAL_SIGN)
       return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrConstantNeedValue);
   // 表达式
+  // TODO 表达式最终演变为一个数，赋予栈中标识符
   auto err = analyseExpression();
     if (err.has_value()) return err;
+  if (isUninitializedVariable(identify)) //未定义变量
+    _instructions.emplace_back(Operation::STO, _uninitialized_vars[identify]);
+  else 
+    _instructions.emplace_back(Operation::STO, _vars[identify]);
   // ';'
   next = nextToken();
   if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
@@ -325,7 +333,6 @@ std::optional<CompilationError> Analyser::analyseItem() {
   return {};
 }
 
-// MARK
 // <因子> ::= [<符号>]( <标识符> | <无符号整数> | '('<表达式>')' )
 // 需要补全
 std::optional<CompilationError> Analyser::analyseFactor() {
@@ -350,11 +357,14 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       // 这里和 <语句序列> 类似，需要根据预读结果调用不同的子程序
       // 但是要注意 default 返回的是一个编译错误
     case TokenType::IDENTIFIER: {
-      // return {}; //TODO
+      if (isUninitializedVariable(next.value().GetValueString()))
+        _instructions.emplace_back(Operation::LOD, _uninitialized_vars[next.value().GetValueString()]);
+      else
+        _instructions.emplace_back(Operation::LOD, _vars[next.value().GetValueString()]);
       break;
     }
     case TokenType::UNSIGNED_INTEGER: {
-      // return {};
+      _instructions.emplace_back(Operation::LIT, std::stoi(next.value().GetValueString()));
       break;
     }
     case TokenType::LEFT_BRACKET: {
