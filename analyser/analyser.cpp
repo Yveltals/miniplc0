@@ -186,7 +186,7 @@ std::optional<CompilationError> Analyser::analyseStatementSequence() {
 // 需要补全
 std::optional<CompilationError> Analyser::analyseConstantExpression(int32_t &out) {
   // out 是常表达式的结果 这里你要分析常表达式并且计算结果
-  // 注意以下均为常表达式 +1 -1 1 同时要注意是否溢出 //TODO
+  // 注意以下均为常表达式 +1 -1 1 同时要注意是否溢出
   auto next = nextToken();
   auto prefix = 1;
   if (!next.has_value())
@@ -205,7 +205,7 @@ std::optional<CompilationError> Analyser::analyseConstantExpression(int32_t &out
   if (next.value().GetType() != TokenType::UNSIGNED_INTEGER) {
     return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrInvalidInput);
   } else {
-    out = prefix * std::stoi(next.value().GetValueString()); //TODO
+    out = prefix * std::stoi(next.value().GetValueString());
   }
   return {};
 }
@@ -259,13 +259,12 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
   // 表达式
   // TODO 表达式最终演变为一个数，赋予栈中标识符
   auto err = analyseExpression();
-    if (err.has_value()) return err;
+  if (err.has_value()) return err;
+  
   if (isUninitializedVariable(identify)) //未定义变量
     _instructions.emplace_back(Operation::STO, _uninitialized_vars[identify]);
-  else if(isInitializedVariable(identify))
-    _instructions.emplace_back(Operation::STO, _vars[identify]);
   else 
-    _instructions.emplace_back(Operation::STO, _consts[identify]);
+    _instructions.emplace_back(Operation::STO, _vars[identify]);
   // ';'
   next = nextToken();
   if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
