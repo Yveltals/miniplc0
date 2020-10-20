@@ -126,7 +126,7 @@ std::optional<CompilationError> Analyser::analyseVariableDeclaration() {
       // '<表达式>'
       auto err = analyseExpression();
       if (err.has_value()) return err;
-      _instructions.emplace_back(Operation::STO, _vars[next.value().GetValueString()]);
+      _instructions.emplace_back(Operation::STO, getIndex(next.value().GetValueString()));
     }
     // ';'
     next = nextToken();
@@ -253,14 +253,11 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
     if (!next.has_value() || next.value().GetType() != TokenType::EQUAL_SIGN)
       return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrConstantNeedValue);
   // 表达式
-  // TODO 表达式最终演变为一个数，赋予栈中标识符
   auto err = analyseExpression();
   if (err.has_value()) return err;
   
-  if (isUninitializedVariable(identify)) //未定义变量
-    _instructions.emplace_back(Operation::STO, _uninitialized_vars[identify]);
-  else 
-    _instructions.emplace_back(Operation::STO, _vars[identify]);
+  _instructions.emplace_back(Operation::STO, getIndex(identify));
+  
   // ';'
   next = nextToken();
   if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
@@ -354,12 +351,7 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       // 这里和 <语句序列> 类似，需要根据预读结果调用不同的子程序
       // 但是要注意 default 返回的是一个编译错误
     case TokenType::IDENTIFIER: {
-      if (isUninitializedVariable(next.value().GetValueString()))
-        _instructions.emplace_back(Operation::LOD, _uninitialized_vars[next.value().GetValueString()]);
-      else if(isInitializedVariable(next.value().GetValueString()))
-        _instructions.emplace_back(Operation::LOD, _vars[next.value().GetValueString()]);
-      else
-        _instructions.emplace_back(Operation::LOD, _consts[next.value().GetValueString()]);  
+      _instructions.emplace_back(Operation::LOD, getIndex(next.value().GetValueString()));
       break;
     }
     case TokenType::UNSIGNED_INTEGER: {

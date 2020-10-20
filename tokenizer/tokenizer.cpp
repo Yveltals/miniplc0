@@ -219,7 +219,7 @@ Tokenizer::nextToken() {
           else if(s=="const") 
             return std::make_pair(std::make_optional<Token>(TokenType::CONST,s,pos,currentPos()),std::optional<CompilationError>());
           else if(s=="print") 
-            return std::make_pair(std::make_optional<Token>(TokenType::PRINT,"printf",pos,currentPos()),std::optional<CompilationError>());
+            return std::make_pair(std::make_optional<Token>(TokenType::PRINT,s,pos,currentPos()),std::optional<CompilationError>());
           // if(tmp != NULL_TOKEN){ //关键字
           //   return std::make_pair(std::make_optional<Token>(TokenType::tmp,keywords[id],pos,currentPos()),
           //                       std::optional<CompilationError>());}
