@@ -7,7 +7,6 @@ std::pair<std::vector<Instruction>, std::optional<CompilationError>>
 Analyser::Analyse() {
   auto err = analyseProgram();
   if (err.has_value())
-    // return std::make_pair(std::vector<Instruction>(), err);
     return std::make_pair(_instructions, err);
   else
     return std::make_pair(_instructions, std::optional<CompilationError>());
@@ -40,15 +39,12 @@ std::optional<CompilationError> Analyser::analyseMain() {
   // <常量声明>
   auto constant = analyseConstantDeclaration();
   if (constant.has_value()) return constant;
-  // _instructions.emplace_back(Operation::ILL, 0);
   // <变量声明>
   auto variable = analyseVariableDeclaration();
   if (variable.has_value()) return variable;
-  // _instructions.emplace_back(Operation::ILL, 0);
   // <语句序列>
   auto statement = analyseStatementSequence();
   if (statement.has_value()) return statement;
-  // _instructions.emplace_back(Operation::ILL, 0);
   return {};
 }
 
@@ -298,7 +294,7 @@ std::optional<CompilationError> Analyser::analyseOutputStatement() {
     return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNoSemicolon);
 
   // 生成相应的指令 WRT
-  _instructions.emplace_back(Operation::WRT, 0);
+  // _instructions.emplace_back(Operation::WRT, 0);
   return {};
 }
 
