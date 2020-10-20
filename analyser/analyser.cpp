@@ -294,7 +294,7 @@ std::optional<CompilationError> Analyser::analyseOutputStatement() {
     return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNoSemicolon);
 
   // 生成相应的指令 WRT
-  // _instructions.emplace_back(Operation::WRT, 0);
+  _instructions.emplace_back(Operation::WRT, 0);
   return {};
 }
 
