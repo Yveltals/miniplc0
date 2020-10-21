@@ -119,15 +119,15 @@ std::optional<CompilationError> Analyser::analyseVariableDeclaration() {
     if (tmp.value().GetType() != TokenType::EQUAL_SIGN) {
       unreadToken(); // TODO: eof?
       addUninitializedVariable(next.value());
-      _instructions.emplace_back(Operation::LIT, 0);
+      // _instructions.emplace_back(Operation::LIT, 0);
     }
     else {
       addVariable(next.value());
-      _instructions.emplace_back(Operation::LIT, 0);
+      // _instructions.emplace_back(Operation::LIT, 0);
       // '<表达式>'
       auto err = analyseExpression();
       if (err.has_value()) return err;
-      _instructions.emplace_back(Operation::STO, getIndex(next.value().GetValueString()));
+      // _instructions.emplace_back(Operation::STO, getIndex(next.value().GetValueString()));
     }
     // ';'
     next = nextToken();
@@ -257,13 +257,14 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
   auto err = analyseExpression();
   if (err.has_value()) return err;
   
-  _instructions.emplace_back(Operation::STO, getIndex(identify));
   
   // ';'
   next = nextToken();
   if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
     return std::make_optional<CompilationError>(_current_pos,ErrorCode::ErrNoSemicolon);
   
+  
+  _instructions.emplace_back(Operation::STO, getIndex(identify));
   return {};
 }
 
@@ -352,6 +353,13 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       // 这里和 <语句序列> 类似，需要根据预读结果调用不同的子程序
       // 但是要注意 default 返回的是一个编译错误
     case TokenType::IDENTIFIER: {
+      if(!isDeclared(next.value().GetValueString()))
+        return std::make_optional<CompilationError>(
+          _current_pos, ErrorCode::ErrNotDeclared);
+      if(isUninitializedVariable(next.value().GetValueString()))
+        return std::make_optional<CompilationError>(
+          _current_pos, ErrorCode::ErrNotInitialized);
+
       _instructions.emplace_back(Operation::LOD, getIndex(next.value().GetValueString()));
       break;
     }
