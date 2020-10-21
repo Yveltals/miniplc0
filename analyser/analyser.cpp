@@ -37,14 +37,14 @@ std::optional<CompilationError> Analyser::analyseProgram() {
 std::optional<CompilationError> Analyser::analyseMain() {
 
   // <常量声明>
-  auto constant = analyseConstantDeclaration();
-  if (constant.has_value()) return constant;
-  // <变量声明>
-  auto variable = analyseVariableDeclaration();
-  if (variable.has_value()) return variable;
-  // <语句序列>
-  auto statement = analyseStatementSequence();
-  if (statement.has_value()) return statement;
+  // auto constant = analyseConstantDeclaration();
+  // if (constant.has_value()) return constant;
+  // // <变量声明>
+  // auto variable = analyseVariableDeclaration();
+  // if (variable.has_value()) return variable;
+  // // <语句序列>
+  // auto statement = analyseStatementSequence();
+  // if (statement.has_value()) return statement;
   return {};
 }
 
